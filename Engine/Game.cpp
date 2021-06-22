@@ -35,6 +35,8 @@ Game::Game( MainWindow& wnd )
 	//{
 	//	obstacles[i].spawn(rng, brd, snake, goal); 
 	//}
+
+	//Test branch changes.
 }
 
 void Game::Go()
