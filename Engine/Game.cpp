@@ -83,7 +83,8 @@ void Game::UpdateModel()
 				SnakeMoveCounter -= SnakeMoveRate;
 				const Location Next = snake.GetNextHeadLocation(delta_loc);
 				if (!brd.isInsideBoard(Next) ||
-					snake.isInTileExceptEnd(Next))
+					snake.isInTileExceptEnd(Next) ||
+					brd.CheckForObstacle (Next))
 				{
 					gameIsOver = true;
 				}
@@ -96,8 +97,7 @@ void Game::UpdateModel()
 						++score;
 						if (score % 3 == 0)
 						{
-							obstacles[nObstacles].spawn(rng, brd, snake, goal);
-							++nObstacles;
+							brd.SpawnObstacle(rng, snake, goal); 
 						}
 					}
 					snake.MoveBy(delta_loc);
@@ -106,13 +106,13 @@ void Game::UpdateModel()
 						goal.Respawn(rng, brd, snake);
 					}
 				}
-				for (int i = 0; i < nObstacles; ++i)
-				{
-					if (Next == obstacles[i].GetLocation())
-					{
-						gameIsOver = true;
-					}
-				}
+				//for (int i = 0; i < nObstacles; ++i)
+				//{
+				//	if (Next == obstacles[i].GetLocation())
+				//	{
+				//		gameIsOver = true;
+				//	}
+				//}
 			}
 			SnakeMoveRate = std::max(SnakeMoveRate - dt * snakeSpeedupFactor, snakeMovePeriodMin);
 		}		
@@ -127,13 +127,14 @@ void Game::ComposeFrame()
 {
 	if (gameIsStarted)
 	{
-		for (int i = 0; i < nObstacles; ++i)
-		{
-			if (nObstacles < nObstaclesMax)
-			{
-				obstacles[i].Draw(brd);
-			}
-		}
+		//for (int i = 0; i < nObstacles; ++i)
+		//{
+		//	if (nObstacles < nObstaclesMax)
+		//	{
+		//		obstacles[i].Draw(brd);
+		//	}
+		//}
+		brd.DrawObstacles();
 		snake.Draw(brd);
 		goal.Draw(brd);
 		if (gameIsOver)
