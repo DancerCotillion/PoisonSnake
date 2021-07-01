@@ -28,6 +28,7 @@
 #include "Snake.h"
 #include "Obstacle.h"
 #include <random>
+#include "FrameTimer.h"
 
 class Game
 {
@@ -47,6 +48,7 @@ private:
 	Graphics gfx;
 	/********************************/
 	/*  User Variables              */
+	FrameTimer ft; 
 	Board brd; 
 	Snake snake; 
 	Location delta_loc = { 1,0 };
@@ -55,12 +57,11 @@ private:
 	static constexpr int nObstaclesMax = 10; 
 	Obstacle obstacles[nObstaclesMax];
 	int nObstacles = 0; 
-	static constexpr int snakeMovePeriodMin = 4; 
-	int score = 1; 
-	int SnakeMoveRate = 20;
-	int SnakeMoveCounter = 0;
-	int snakeSpeedupPeriod = 180; 
-	int snakeSpeedupCounter = 0;
+	static constexpr float snakeMovePeriodMin = 0.07f; 
+	int score = 1;
+	float SnakeMoveRate = 0.4f;
+	float SnakeMoveCounter = 0.0f;
+	float snakeSpeedupFactor = 0.01f;
 	bool gameIsOver = false; 
 	bool gameIsStarted = false; 
 	/********************************/

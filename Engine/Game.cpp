@@ -49,6 +49,8 @@ void Game::Go()
 
 void Game::UpdateModel()
 {
+	const float dt = ft.Mark(); 
+
 	if (gameIsStarted)
 	{
 		if (!gameIsOver)
@@ -72,10 +74,13 @@ void Game::UpdateModel()
 			{
 				delta_loc = { -1, 0 };
 			}
-			++SnakeMoveCounter;
+
+			//TODO: Change this so it is tied to score instead - call the following on time intervals (take a now and compare to old, if greater than half a second, move and change interval when eating(?)). 
+
+			SnakeMoveCounter += dt;
 			if (SnakeMoveCounter >= SnakeMoveRate)
 			{
-				SnakeMoveCounter = 0;
+				SnakeMoveCounter -= SnakeMoveRate;
 				const Location Next = snake.GetNextHeadLocation(delta_loc);
 				if (!brd.isInsideBoard(Next) ||
 					snake.isInTileExceptEnd(Next))
@@ -109,13 +114,7 @@ void Game::UpdateModel()
 					}
 				}
 			}
-			//snake moves up over time, rather than after collecting shit - could tie this and the obstacle behaviour to a score? 
-			++snakeSpeedupCounter;
-			if (snakeSpeedupCounter >= snakeSpeedupPeriod)
-			{
-				snakeSpeedupCounter = 0;
-				SnakeMoveRate = std::max(SnakeMoveRate -1, snakeMovePeriodMin);
-			}
+			SnakeMoveRate = std::max(SnakeMoveRate - dt * snakeSpeedupFactor, snakeMovePeriodMin);
 		}		
 	}
 	else
