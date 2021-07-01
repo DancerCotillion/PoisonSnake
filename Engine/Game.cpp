@@ -28,15 +28,16 @@ Game::Game( MainWindow& wnd )
 	gfx( wnd ),
 	brd (gfx),
 	rng(std::random_device()()),
-	snake({2,2}),
-	goal(rng, brd, snake)
+	snake({2,2})
 {
-	//for (int i = 0l; i < nObstaclesMax; ++i)
-	//{
-	//	obstacles[i].spawn(rng, brd, snake, goal); 
-	//}
-
-	//Test branch changes.
+	for (int i = 0; i < nPoison; i++)
+	{
+		brd.SpawnContents(rng, snake, 3); 
+	}
+	for (int i = 0; i < nFood; i++)
+	{
+		brd.SpawnContents(rng, snake, 2); 
+	}
 }
 
 void Game::Go()
@@ -75,44 +76,50 @@ void Game::UpdateModel()
 				delta_loc = { -1, 0 };
 			}
 
+			float snakeModifiedMovePeriond = SnakeMoveRate; 
+			if (wnd.kbd.KeyIsPressed(VK_CONTROL))
+			{
+				snakeModifiedMovePeriond = std::min(SnakeMoveRate, snakeMovePeriodSpeedUp); 
+			}
+
 			//TODO: Change this so it is tied to score instead - call the following on time intervals (take a now and compare to old, if greater than half a second, move and change interval when eating(?)). 
 
 			SnakeMoveCounter += dt;
-			if (SnakeMoveCounter >= SnakeMoveRate)
+			if (SnakeMoveCounter >= snakeModifiedMovePeriond)
 			{
-				SnakeMoveCounter -= SnakeMoveRate;
+				SnakeMoveCounter -= snakeModifiedMovePeriond;
 				const Location Next = snake.GetNextHeadLocation(delta_loc);
+				const int contents = brd.GetContents(Next); 
+
 				if (!brd.isInsideBoard(Next) ||
 					snake.isInTileExceptEnd(Next) ||
-					brd.CheckForObstacle (Next))
+					contents == 1)
 				{
 					gameIsOver = true;
 				}
+				else if (contents == 2)
+				{
+					snake.Grow();
+					snake.MoveBy(delta_loc);
+					brd.ConsumeContents(Next); 
+					++score;
+					if (score % 3 == 0)
+					{
+						brd.SpawnContents(rng, snake, 1);
+					}
+					brd.SpawnContents(rng, snake, 2);
+				}
+				else if (contents == 3)
+				{
+					snake.MoveBy(delta_loc);
+					brd.ConsumeContents(Next);
+					brd.SpawnContents(rng, snake, 3);
+					SnakeMoveRate = std::max(SnakeMoveRate * snakeSpeedupFactor, snakeMovePeriodMin); 
+				}
 				else
 				{
-					const bool eating = Next == goal.GetLocation();
-					if (eating)
-					{
-						snake.Grow();
-						++score;
-						if (score % 3 == 0)
-						{
-							brd.SpawnObstacle(rng, snake, goal); 
-						}
-					}
 					snake.MoveBy(delta_loc);
-					if (eating)
-					{
-						goal.Respawn(rng, brd, snake);
-					}
 				}
-				//for (int i = 0; i < nObstacles; ++i)
-				//{
-				//	if (Next == obstacles[i].GetLocation())
-				//	{
-				//		gameIsOver = true;
-				//	}
-				//}
 			}
 			SnakeMoveRate = std::max(SnakeMoveRate - dt * snakeSpeedupFactor, snakeMovePeriodMin);
 		}		
@@ -127,16 +134,8 @@ void Game::ComposeFrame()
 {
 	if (gameIsStarted)
 	{
-		//for (int i = 0; i < nObstacles; ++i)
-		//{
-		//	if (nObstacles < nObstaclesMax)
-		//	{
-		//		obstacles[i].Draw(brd);
-		//	}
-		//}
-		brd.DrawObstacles();
 		snake.Draw(brd);
-		goal.Draw(brd);
+		brd.DrawCells(); 
 		if (gameIsOver)
 		{
 			SpriteCodex::DrawGameOver(200, 200, gfx);

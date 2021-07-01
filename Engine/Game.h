@@ -24,7 +24,6 @@
 #include "Mouse.h"
 #include "Graphics.h"
 #include "Board.h"
-#include "Goal.h"
 #include "Snake.h"
 #include "Obstacle.h"
 #include <random>
@@ -53,15 +52,17 @@ private:
 	Snake snake; 
 	Location delta_loc = { 1,0 };
 	std::mt19937 rng;
-	Goal goal; 
 	static constexpr int nObstaclesMax = 10; 
 	Obstacle obstacles[nObstaclesMax];
 	int nObstacles = 0; 
-	static constexpr float snakeMovePeriodMin = 0.07f; 
+	static constexpr float snakeMovePeriodMin = 0.040f; 
+	static constexpr float snakeMovePeriodSpeedUp = 0.15f; 
 	int score = 1;
-	float SnakeMoveRate = 0.4f;
+	float SnakeMoveRate = 0.9f;
 	float SnakeMoveCounter = 0.0f;
 	float snakeSpeedupFactor = 0.01f;
+	static constexpr float nPoison = 240; 
+	static constexpr float nFood = 12; 
 	bool gameIsOver = false; 
 	bool gameIsStarted = false; 
 	/********************************/
