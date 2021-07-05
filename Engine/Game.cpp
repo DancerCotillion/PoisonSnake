@@ -32,11 +32,11 @@ Game::Game( MainWindow& wnd )
 {
 	for (int i = 0; i < nPoison; i++)
 	{
-		brd.SpawnContents(rng, snake, 3); 
+		brd.SpawnContents(rng, snake, Board::CellContents::Poison); 
 	}
 	for (int i = 0; i < nFood; i++)
 	{
-		brd.SpawnContents(rng, snake, 2); 
+		brd.SpawnContents(rng, snake, Board::CellContents::Food); 
 	}
 }
 
@@ -61,7 +61,7 @@ void Game::UpdateModel()
 				delta_loc = { 0, -1 };
 			}
 			else if (wnd.kbd.KeyIsPressed(VK_DOWN))
-			{	//solving the doubling back issue - replicate for all directions. 
+			{	//solving the doubling back issue - replicate for all directions if I can be arsed. 
 				if (delta_loc.y != -1)
 				{
 					delta_loc = { 0, 1 };
@@ -83,21 +83,20 @@ void Game::UpdateModel()
 			}
 
 			//TODO: Change this so it is tied to score instead - call the following on time intervals (take a now and compare to old, if greater than half a second, move and change interval when eating(?)). 
-
 			SnakeMoveCounter += dt;
 			if (SnakeMoveCounter >= snakeModifiedMovePeriond)
 			{
 				SnakeMoveCounter -= snakeModifiedMovePeriond;
 				const Location Next = snake.GetNextHeadLocation(delta_loc);
-				const int contents = brd.GetContents(Next); 
+				const Board::CellContents contents = brd.GetContents(Next); 
 
 				if (!brd.isInsideBoard(Next) ||
 					snake.isInTileExceptEnd(Next) ||
-					contents == 1)
+					contents == Board::CellContents::Obstacle)
 				{
 					gameIsOver = true;
 				}
-				else if (contents == 2)
+				else if (contents == Board::CellContents::Food)
 				{
 					snake.Grow();
 					snake.MoveBy(delta_loc);
@@ -105,15 +104,15 @@ void Game::UpdateModel()
 					++score;
 					if (score % 3 == 0)
 					{
-						brd.SpawnContents(rng, snake, 1);
+						brd.SpawnContents(rng, snake, Board::CellContents::Obstacle);
 					}
-					brd.SpawnContents(rng, snake, 2);
+					brd.SpawnContents(rng, snake, Board::CellContents::Food);
 				}
-				else if (contents == 3)
+				else if (contents == Board::CellContents::Poison)
 				{
 					snake.MoveBy(delta_loc);
 					brd.ConsumeContents(Next);
-					brd.SpawnContents(rng, snake, 3);
+					brd.SpawnContents(rng, snake, Board::CellContents::Poison);
 					SnakeMoveRate = std::max(SnakeMoveRate * snakeSpeedupFactor, snakeMovePeriodMin); 
 				}
 				else
@@ -121,7 +120,6 @@ void Game::UpdateModel()
 					snake.MoveBy(delta_loc);
 				}
 			}
-			SnakeMoveRate = std::max(SnakeMoveRate - dt * snakeSpeedupFactor, snakeMovePeriodMin);
 		}		
 	}
 	else

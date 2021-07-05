@@ -58,9 +58,11 @@ private:
 	static constexpr float snakeMovePeriodMin = 0.040f; 
 	static constexpr float snakeMovePeriodSpeedUp = 0.15f; 
 	int score = 1;
-	float SnakeMoveRate = 0.9f;
+
+	float SnakeMoveRate = 0.4f;
 	float SnakeMoveCounter = 0.0f;
-	float snakeSpeedupFactor = 0.01f;
+	float snakeSpeedupFactor = 0.93f;
+
 	static constexpr float nPoison = 240; 
 	static constexpr float nFood = 12; 
 	bool gameIsOver = false; 
